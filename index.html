@@ -1,28 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Term-Trimmer | Privacy Scanner</title>
     <style>
         :root {
-            --bg: #0f172a;
-            --card-bg: #1e293b;
-            --primary: #38bdf8;
+            /* Electric Orchid Theme */
+            --bg: #F8F9FF;
+            /* Ghost White */
+            --card-bg: rgba(255, 255, 255, 0.65);
+            /* Glassmorphism Base */
+            --primary: #6C5CE7;
+            /* Royal Amethyst */
+            --secondary: #00D2FF;
+            /* Electric Blue */
+            --text: #0F172A;
+            /* Deep Midnight */
             --danger: #ef4444;
             --warning: #f59e0b;
             --success: #10b981;
-            --text: #f8fafc;
+
+            --glass-border: 1px solid rgba(255, 255, 255, 0.9);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            --glass-blur: blur(12px);
         }
 
         body {
             font-family: 'Inter', system-ui, sans-serif;
             background-color: var(--bg);
+            /* Subtle background gradient to enhance glass effect */
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(108, 92, 231, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 210, 255, 0.1) 0%, transparent 20%);
             color: var(--text);
             display: flex;
             justify-content: center;
             padding: 40px 20px;
             margin: 0;
+            min-height: 100vh;
         }
 
         .container {
@@ -35,60 +52,108 @@
             margin-bottom: 40px;
         }
 
-        h1 { font-size: 2.5rem; margin-bottom: 10px; color: var(--primary); }
-        p { color: #94a3b8; }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        p {
+            color: #475569;
+            font-weight: 500;
+        }
 
         .input-section {
             background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            padding: 25px;
+            /* Slightly increased padding */
+            border-radius: 16px;
+            /* High-end rounded corners */
+            box-shadow: var(--glass-shadow);
         }
 
         textarea {
             width: 100%;
             height: 200px;
-            background: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            color: white;
+            background: rgba(255, 255, 255, 0.5);
+            /* Semi-transparent */
+            border: 1px solid rgba(108, 92, 231, 0.2);
+            /* Subtle purple border */
+            border-radius: 12px;
+            color: var(--text);
             padding: 15px;
             font-size: 1rem;
             resize: vertical;
             box-sizing: border-box;
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.2);
         }
 
         button {
             width: 100%;
             padding: 15px;
             margin-top: 15px;
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             border: none;
-            border-radius: 8px;
-            color: var(--bg);
+            border-radius: 12px;
+            color: white;
+            /* Text needs to be white on this gradient */
             font-weight: bold;
             font-size: 1.1rem;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
         }
 
-        button:hover { transform: scale(1.01); filter: brightness(1.1); }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 210, 255, 0.4);
+            filter: brightness(1.1);
+        }
 
         /* Results Styling */
-        #results { margin-top: 30px; display: none; }
+        #results {
+            margin-top: 30px;
+            display: none;
+        }
 
         .score-card {
             background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            padding: 25px;
+            border-radius: 16px;
             text-align: center;
-            border: 2px solid var(--primary);
+            border: var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 20px;
         }
 
-        .grade { font-size: 4rem; font-weight: 800; margin: 10px 0; }
-        
+        .grade {
+            font-size: 4rem;
+            font-weight: 800;
+            margin: 10px 0;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
         .progress-container {
-            background: #334155;
+            background: rgba(15, 23, 42, 0.1);
+            /* Darker track for visibility */
             height: 12px;
             border-radius: 10px;
             margin: 20px 0;
@@ -99,6 +164,9 @@
             height: 100%;
             width: 0%;
             transition: width 1s ease-in-out;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            /* Default gradient, JS can override */
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
         }
 
         .flags-grid {
@@ -109,114 +177,131 @@
         }
 
         .flag-item {
-            background: #1e293b;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
             padding: 15px;
             border-left: 4px solid var(--primary);
-            border-radius: 4px;
+            border-radius: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.8);
+            border-right: 1px solid rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
         }
 
-        .red-flag { border-left-color: var(--danger); color: #fda4af; }
+        .flag-item:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .red-flag {
+            border-left-color: var(--danger);
+            color: #b91c1c;
+            /* Darker red for text readability on light bg */
+        }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <header>
-        <h1>Term-Trimmer</h1>
-        <p>Paste "Terms & Conditions" to find hidden privacy risks.</p>
-    </header>
+    <div class="container">
+        <header>
+            <h1>Term-Trimmer</h1>
+            <p>Paste "Terms & Conditions" to find hidden privacy risks.</p>
+        </header>
 
-    <div class="input-section">
-        <textarea id="policyInput" placeholder="Paste the text here..."></textarea>
-        <button onclick="scanPolicy()">Scan Agreement</button>
-    </div>
-
-    <div id="results">
-        <div class="score-card">
-            <h3>Privacy Integrity Grade</h3>
-            <div id="gradeDisplay" class="grade">-</div>
-            <div class="progress-container">
-                <div id="progress-bar"></div>
-            </div>
-            <p id="summaryText"></p>
+        <div class="input-section">
+            <textarea id="policyInput" placeholder="Paste the text here..."></textarea>
+            <button onclick="scanPolicy()">Scan Agreement</button>
         </div>
 
-        <div class="flags-grid" id="flagsGrid">
+        <div id="results">
+            <div class="score-card">
+                <h3>Privacy Integrity Grade</h3>
+                <div id="gradeDisplay" class="grade">-</div>
+                <div class="progress-container">
+                    <div id="progress-bar"></div>
+                </div>
+                <p id="summaryText"></p>
             </div>
+
+            <div class="flags-grid" id="flagsGrid">
+            </div>
+        </div>
     </div>
-</div>
 
-<script>
-    function scanPolicy() {
-        const text = document.getElementById('policyInput').value.toLowerCase();
-        if (!text) return alert("Please paste some text first!");
+    <script>
+        function scanPolicy() {
+            const text = document.getElementById('policyInput').value.toLowerCase();
+            if (!text) return alert("Please paste some text first!");
 
-        // 1. Define Danger Dictionaries
-        const categories = {
-            data: { 
-                words: ['sell', 'third-party', 'partners', 'affiliates', 'advertising'],
-                label: 'Data Sharing Risks',
-                penalty: 15
-            },
-            surveillance: { 
-                words: ['tracking', 'gps', 'location', 'microphone', 'camera', 'biometric'],
-                label: 'Surveillance Risks',
-                penalty: 20
-            },
-            rights: { 
-                words: ['waive', 'arbitration', 'court', 'irrevocable', 'ownership'],
-                label: 'Legal Rights Risks',
-                penalty: 10
+            // 1. Define Danger Dictionaries
+            const categories = {
+                data: {
+                    words: ['sell', 'third-party', 'partners', 'affiliates', 'advertising'],
+                    label: 'Data Sharing Risks',
+                    penalty: 15
+                },
+                surveillance: {
+                    words: ['tracking', 'gps', 'location', 'microphone', 'camera', 'biometric'],
+                    label: 'Surveillance Risks',
+                    penalty: 20
+                },
+                rights: {
+                    words: ['waive', 'arbitration', 'court', 'irrevocable', 'ownership'],
+                    label: 'Legal Rights Risks',
+                    penalty: 10
+                }
+            };
+
+            let totalPenalty = 0;
+            let foundFlags = [];
+
+            // 2. Run Scan Logic
+            for (let cat in categories) {
+                let matches = categories[cat].words.filter(word => text.includes(word));
+                if (matches.length > 0) {
+                    totalPenalty += categories[cat].penalty;
+                    foundFlags.push({
+                        label: categories[cat].label,
+                        found: matches.join(', ')
+                    });
+                }
             }
-        };
 
-        let totalPenalty = 0;
-        let foundFlags = [];
+            // 3. Calculate Score & Grade
+            let score = Math.max(0, 100 - totalPenalty);
+            let grade, color;
 
-        // 2. Run Scan Logic
-        for (let cat in categories) {
-            let matches = categories[cat].words.filter(word => text.includes(word));
-            if (matches.length > 0) {
-                totalPenalty += categories[cat].penalty;
-                foundFlags.push({
-                    label: categories[cat].label,
-                    found: matches.join(', ')
-                });
-            }
-        }
+            if (score >= 90) { grade = 'A'; color = '#10b981'; } /* Success */
+            else if (score >= 70) { grade = 'B'; color = '#00D2FF'; } /* Secondary (Electric Blue) */
+            else if (score >= 50) { grade = 'C'; color = '#f59e0b'; } /* Warning */
+            else { grade = 'F'; color = '#b91c1c'; } /* Danger (High Contrast) */
 
-        // 3. Calculate Score & Grade
-        let score = Math.max(0, 100 - totalPenalty);
-        let grade, color;
+            // 4. Update UI
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('gradeDisplay').innerText = grade;
+            document.getElementById('gradeDisplay').style.color = color;
 
-        if (score >= 90) { grade = 'A'; color = '#10b981'; }
-        else if (score >= 70) { grade = 'B'; color = '#38bdf8'; }
-        else if (score >= 50) { grade = 'C'; color = '#f59e0b'; }
-        else { grade = 'F'; color = '#ef4444'; }
+            const bar = document.getElementById('progress-bar');
+            bar.style.width = score + '%';
+            bar.style.backgroundColor = color;
 
-        // 4. Update UI
-        document.getElementById('results').style.display = 'block';
-        document.getElementById('gradeDisplay').innerText = grade;
-        document.getElementById('gradeDisplay').style.color = color;
-        
-        const bar = document.getElementById('progress-bar');
-        bar.style.width = score + '%';
-        bar.style.backgroundColor = color;
-
-        const grid = document.getElementById('flagsGrid');
-        grid.innerHTML = foundFlags.map(f => `
+            const grid = document.getElementById('flagsGrid');
+            grid.innerHTML = foundFlags.map(f => `
             <div class="flag-item red-flag">
                 <strong>${f.label}</strong><br>
                 <small>Detected: ${f.found}</small>
             </div>
         `).join('');
 
-        document.getElementById('summaryText').innerText = `Your privacy score is ${score}/100 based on detected keywords.`;
-        
-        // Scroll to results
-        window.scrollTo({ top: document.getElementById('results').offsetTop, behavior: 'smooth' });
-    }
-</script>
+            document.getElementById('summaryText').innerText = `Your privacy score is ${score}/100 based on detected keywords.`;
+
+            // Scroll to results
+            window.scrollTo({ top: document.getElementById('results').offsetTop, behavior: 'smooth' });
+        }
+    </script>
 
 </body>
+
 </html>
