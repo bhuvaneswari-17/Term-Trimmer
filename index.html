@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Term-Trimmer | Privacy Scanner</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #38bdf8;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 10px; color: var(--primary); }
+        p { color: #94a3b8; }
+
+        .input-section {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: white;
+            padding: 15px;
+            font-size: 1rem;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 15px;
+            background: var(--primary);
+            border: none;
+            border-radius: 8px;
+            color: var(--bg);
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover { transform: scale(1.01); filter: brightness(1.1); }
+
+        /* Results Styling */
+        #results { margin-top: 30px; display: none; }
+
+        .score-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid var(--primary);
+        }
+
+        .grade { font-size: 4rem; font-weight: 800; margin: 10px 0; }
+        
+        .progress-container {
+            background: #334155;
+            height: 12px;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 1s ease-in-out;
+        }
+
+        .flags-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .flag-item {
+            background: #1e293b;
+            padding: 15px;
+            border-left: 4px solid var(--primary);
+            border-radius: 4px;
+        }
+
+        .red-flag { border-left-color: var(--danger); color: #fda4af; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Term-Trimmer</h1>
+        <p>Paste "Terms & Conditions" to find hidden privacy risks.</p>
+    </header>
+
+    <div class="input-section">
+        <textarea id="policyInput" placeholder="Paste the text here..."></textarea>
+        <button onclick="scanPolicy()">Scan Agreement</button>
+    </div>
+
+    <div id="results">
+        <div class="score-card">
+            <h3>Privacy Integrity Grade</h3>
+            <div id="gradeDisplay" class="grade">-</div>
+            <div class="progress-container">
+                <div id="progress-bar"></div>
+            </div>
+            <p id="summaryText"></p>
+        </div>
+
+        <div class="flags-grid" id="flagsGrid">
+            </div>
+    </div>
+</div>
+
+<script>
+    function scanPolicy() {
+        const text = document.getElementById('policyInput').value.toLowerCase();
+        if (!text) return alert("Please paste some text first!");
+
+        // 1. Define Danger Dictionaries
+        const categories = {
+            data: { 
+                words: ['sell', 'third-party', 'partners', 'affiliates', 'advertising'],
+                label: 'Data Sharing Risks',
+                penalty: 15
+            },
+            surveillance: { 
+                words: ['tracking', 'gps', 'location', 'microphone', 'camera', 'biometric'],
+                label: 'Surveillance Risks',
+                penalty: 20
+            },
+            rights: { 
+                words: ['waive', 'arbitration', 'court', 'irrevocable', 'ownership'],
+                label: 'Legal Rights Risks',
+                penalty: 10
+            }
+        };
+
+        let totalPenalty = 0;
+        let foundFlags = [];
+
+        // 2. Run Scan Logic
+        for (let cat in categories) {
+            let matches = categories[cat].words.filter(word => text.includes(word));
+            if (matches.length > 0) {
+                totalPenalty += categories[cat].penalty;
+                foundFlags.push({
+                    label: categories[cat].label,
+                    found: matches.join(', ')
+                });
+            }
+        }
+
+        // 3. Calculate Score & Grade
+        let score = Math.max(0, 100 - totalPenalty);
+        let grade, color;
+
+        if (score >= 90) { grade = 'A'; color = '#10b981'; }
+        else if (score >= 70) { grade = 'B'; color = '#38bdf8'; }
+        else if (score >= 50) { grade = 'C'; color = '#f59e0b'; }
+        else { grade = 'F'; color = '#ef4444'; }
+
+        // 4. Update UI
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('gradeDisplay').innerText = grade;
+        document.getElementById('gradeDisplay').style.color = color;
+        
+        const bar = document.getElementById('progress-bar');
+        bar.style.width = score + '%';
+        bar.style.backgroundColor = color;
+
+        const grid = document.getElementById('flagsGrid');
+        grid.innerHTML = foundFlags.map(f => `
+            <div class="flag-item red-flag">
+                <strong>${f.label}</strong><br>
+                <small>Detected: ${f.found}</small>
+            </div>
+        `).join('');
+
+        document.getElementById('summaryText').innerText = `Your privacy score is ${score}/100 based on detected keywords.`;
+        
+        // Scroll to results
+        window.scrollTo({ top: document.getElementById('results').offsetTop, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>
